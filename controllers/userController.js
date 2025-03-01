@@ -385,7 +385,9 @@ const otpVerification = async (req, res) => {
 //     }
 //   };
 
-
+  //get all Workouts for user show
+  
+ 
 
 module.exports={
     signUp,
@@ -393,6 +395,7 @@ module.exports={
     otpVerification,
     login,
     // googleLogin,
+   
     
     
   

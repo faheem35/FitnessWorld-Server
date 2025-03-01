@@ -31,7 +31,7 @@ exports.addWorkoutController =async (req,res)=>{
           
 }
 
-//get all Workouts
+//get all Workouts for admin panel show
 exports.allWorkoutsController =async (req,res)=>{
 
           const searchkey = req.query.search
@@ -54,31 +54,6 @@ exports.allWorkoutsController =async (req,res)=>{
           }          
       }
 
-
-      //editWorkout
-exports.editWorkoutController =async (req,res)=>{
-
-          console.log("inside editWorkoutController");
-          const id= req.params.id
-          
-          const{muscleName,workoutName,count,tutorialLink,workoutImg}= req.body
-          const reUploadWorkoutImg = req.file? req.file.filename : workoutImg
-      
-          
-      
-         
-         try{
-          const updateWorkout = await workouts.findByIdAndUpdate({_id:id},{muscleName,workoutName,count,tutorialLink,workoutImg:reUploadWorkoutImg},{new:true})
-          await updateWorkout.save()
-          res.status(200).json(updateWorkout)
-                   
-      
-          }catch(err){
-                    res.status(401).json(err)
-          }          
-      }
-
-
       //removeWorkout 
 exports.removeWorkoutController=async(req,res)=>{
           console.log("inside removeWorkoutController");
@@ -95,6 +70,43 @@ exports.removeWorkoutController=async(req,res)=>{
 }
 
 
+      //editWorkout
+      exports.editWorkoutController =async (req,res)=>{
 
+        console.log("inside editWorkoutController");
+        const id= req.params.id
+        
+        const{muscleName,workoutName,count,tutorialLink,workoutImg}= req.body
+        const reUploadWorkoutImg = req.file? req.file.filename : workoutImg
+    
+        
+       try{
+        const updateWorkout = await workouts.findByIdAndUpdate({_id:id},{muscleName,workoutName,count,tutorialLink,workoutImg:reUploadWorkoutImg},{new:true})
+        await updateWorkout.save()
+        res.status(200).json(updateWorkout)
+                 
+    
+        }catch(err){
+                  res.status(401).json(err)
+        }          
+    }
+
+    //get all Workouts for user show
+exports.allWorkoutsForUserController =async (req,res)=>{
+
+
+
+  console.log("inside allWorkoutsForUserController");
+
+
+ 
+ try{
+            const allWorkouts = await workouts.find()
+            res.status(200).json(allWorkouts)
+
+  }catch(err){
+            res.status(401).json(err)
+  }          
+}
 
 

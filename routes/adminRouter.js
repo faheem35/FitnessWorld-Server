@@ -17,12 +17,12 @@ router.post("/adminAddWorkout", multerMiddleware.single('workoutImg'), workoutCo
 router.get('/all-workouts',workoutController.allWorkoutsController)
 
 
-//workouts/10/edit: http://localhost:3000/workouts/id/edit
-router.put('/workouts/:id/edit',multerMiddleware.single('workoutImg'),workoutController.editWorkoutController)
-
 //workouts/id/edit: http://localhost:3000/workouts/id/remove
 router.delete('/workouts/:id/remove',workoutController.removeWorkoutController)
 
+
+//workouts/10/edit: http://localhost:3000/workouts/id/edit
+router.put('/workouts/:id/edit',multerMiddleware.single('workoutImg'),workoutController.editWorkoutController)
 
 
 module.exports = router   
