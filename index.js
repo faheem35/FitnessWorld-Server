@@ -5,6 +5,8 @@ const router =require("./routes/router")
 const adminRouter = require("./routes/adminRouter")
 require("./database/dbConnection")
 
+const cookieParser = require("cookie-parser")
+
 
 const faserver= express()  //creating express server
 
@@ -13,6 +15,7 @@ faserver.use(express.json())  //using express.json()
 faserver.use(router)
 faserver.use(adminRouter)
 faserver.use('/uploads', express.static('./uploads'))
+faserver.use(cookieParser())
 
 const PORT= 3000 || process.env.PORT //setting port for run
 
@@ -27,4 +30,3 @@ faserver.get('/',(req,res)=>{  //req means request, res means result
 faserver.post('/',(req,res)=>{
           res.status(200).send("POST request")
 })
-

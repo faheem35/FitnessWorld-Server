@@ -117,7 +117,7 @@ const sendVerificationMail = async (email, otp) => {
   }
 };
 
-const signUp = async (req, res) => {
+exports.signUp = async (req, res) => {
   
   try {
       const { firstName, lastName, password, email, phoneNumber } = req.body;
@@ -168,7 +168,7 @@ const signUp = async (req, res) => {
   }
 };
 
-const resendOtp = async (req, res) => {
+exports.resendOtp = async (req, res) => {
     try {
         // Retrieve the email from the request body
         const { email } = req.body;
@@ -213,7 +213,7 @@ const resendOtp = async (req, res) => {
 };
 
 
-const otpVerification = async (req, res) => {
+exports.otpVerification = async (req, res) => {
     
      const { otp, email } = req.body;
      
@@ -246,7 +246,7 @@ const otpVerification = async (req, res) => {
      }
  };
  
- const login = async (req, res) => {
+ exports.login = async (req, res) => {
     const { email, password } = req.body;
     console.log(email, password);
 
@@ -280,10 +280,12 @@ const otpVerification = async (req, res) => {
             //console.log("Refresh Token Secret:", process.env.REFRESH_TOKEN_SECRET_KEY);
 
             
-            token = await jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET_KEY, { expiresIn: '1h' });
-            //console.log("Token generated:",token)
+            token = await jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET_KEY, { expiresIn: '2h' });
+            // console.log("Token generated:",token)
             refreshToken = await jwt.sign({ email: email }, process.env.REFRESH_TOKEN_SECRET_KEY, { expiresIn: '7d' });
-            //console.log(" Referesh Token generated:",refreshToken)
+            // console.log(" Referesh Token generated:",refreshToken)
+            
+            
         } 
 
         // Store the refresh token in an HttpOnly cookie
@@ -312,7 +314,44 @@ const otpVerification = async (req, res) => {
 };
 
 
-// const googleLogin = async (req, res) => {
+
+
+
+
+
+// // Refresh Token API endpoint
+// exports.refreshToken = async (req, res) => {
+//     console.log("Received Cookies:", req.cookies);
+//     const refreshToken = req.cookies.refreshToken;
+    
+
+
+//     if (!refreshToken) return res.status(401).json({ message: "No refresh token available" });
+
+//     try {
+//         // Verify the refresh token
+//         const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET_KEY);
+
+//         // Find the user associated with the email in the refresh token
+//         const user = await users.findOne({ email: decoded.email });
+//         if (!user) return res.status(400).json({ message: "User not found" });
+
+//         // Generate a new access token
+//         const newAccessToken = jwt.sign({ email: user.email }, process.env.ACCESS_TOKEN_SECRET_KEY, { expiresIn: '1h' });
+
+//         // Return the new access token
+//         return res.status(200).json({
+//             message: "New access token created",
+//             accessToken: newAccessToken,
+//         });
+
+//     } catch (error) {
+//         console.log('Error in creating the new access token:', error.message);
+//         return res.status(403).json({ message: "Error in creating the new access token" });
+//     }
+// };
+
+// exports.googleLogin = async (req, res) => {
 //     const { email, email_verified, firstName, lastName, id } = req.body;
   
 //     try {
@@ -389,15 +428,15 @@ const otpVerification = async (req, res) => {
   
  
 
-module.exports={
-    signUp,
-    resendOtp,
-    otpVerification,
-    login,
-    // googleLogin,
+// module.exports={
+//     signUp,
+//     resendOtp,
+//     otpVerification,
+//     login,
+//     // googleLogin,
    
     
     
   
-  }
+//   }
  

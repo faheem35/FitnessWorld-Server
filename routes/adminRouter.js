@@ -24,6 +24,12 @@ router.delete('/workouts/:id/remove',workoutController.removeWorkoutController)
 //workouts/10/edit: http://localhost:3000/workouts/id/edit
 router.put('/workouts/:id/edit',multerMiddleware.single('workoutImg'),workoutController.editWorkoutController)
 
+//userlist: http://localhost:3000/userlist
+router.get('/userlist',adminController.fetchUser)
+
+
+//useredit: http://localhost:3000/useredit/id
+router.patch('/useredit/:id',adminController.editUser)
 
 module.exports = router   
 
