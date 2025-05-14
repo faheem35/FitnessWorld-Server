@@ -16,6 +16,9 @@ router.post("/otpverification", userController.otpVerification);
 // http://localhost:3000/login
 router.post("/login", userController.login);
 
+// http://localhost:3000/google-login
+router.post('/google-login',userController.googleLogin)
+
 // // http://localhost:3000/refreshtoken
 // router.post("/refreshtoken", userController.refreshToken);
 

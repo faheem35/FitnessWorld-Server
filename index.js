@@ -3,6 +3,7 @@ const express = require('express') //importing express
 const cors = require('cors')     //importing cors
 const router =require("./routes/router")
 const adminRouter = require("./routes/adminRouter")
+const trainerRouter = require("./routes/trainerRouter")
 require("./database/dbConnection")
 
 const cookieParser = require("cookie-parser")
@@ -14,6 +15,7 @@ faserver.use(cors()) //using cors
 faserver.use(express.json())  //using express.json()
 faserver.use(router)
 faserver.use(adminRouter)
+faserver.use(trainerRouter)
 faserver.use('/uploads', express.static('./uploads'))
 faserver.use(cookieParser())
 

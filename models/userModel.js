@@ -27,6 +27,10 @@ const userSchema= new mongoose.Schema({
         type:Boolean,
         default:false
     },
+    isTrainer:{
+        type:Boolean,
+        default:false
+    },
     status:{
         type:String,
         enum:['active','inactive','blocked','unBlock'],

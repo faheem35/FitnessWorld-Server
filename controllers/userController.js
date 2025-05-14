@@ -42,11 +42,11 @@ const sendVerificationMail = async (email, otp) => {
                   .header {
                       text-align: center;
                       padding: 20px 0;
-                      background-color: #FDF2F8;
+                      background-color:rgb(39, 32, 32);
                   }
                   .logo {
                       font-size: 24px;
-                      color: #BE185D;
+                      color:rgb(216, 6, 6);
                       font-weight: bold;
                   }
                   .content {
@@ -56,7 +56,7 @@ const sendVerificationMail = async (email, otp) => {
                   .otp-code {
                       font-size: 32px;
                       font-weight: bold;
-                      color: #BE185D;
+                      color:rgb(221, 16, 16);
                       letter-spacing: 5px;
                       margin: 20px 0;
                   }
@@ -313,7 +313,78 @@ exports.otpVerification = async (req, res) => {
     }
 };
 
-
+exports.googleLogin = async (req, res) => {
+    const { email, email_verified, firstName, lastName, id } = req.body;
+  
+    try {
+      if (!email || !id) {
+        return res.status(400).json({ message: 'Missing required fields' });
+      }
+  
+      // Check if the user already exists
+      let existingUser = await User.findOne({ email });
+  
+      if (existingUser) {
+        // Generate Tokens
+        const token = jwt.sign(
+          { email: existingUser.email, id: existingUser._id },
+          process.env.ACCESS_TOKEN_SECRET_KEY,
+          { expiresIn: '1h' }
+        );
+        console.log("Token:",token)
+  
+        const refreshToken = jwt.sign(
+          { email: existingUser.email, id: existingUser._id },
+          process.env.REFRESH_TOKEN_SECRET_KEY,
+          { expiresIn: '7d' }
+        );
+        console.log("Refresh Token:",refreshToken)
+  
+        return res.status(200).json({
+          message: 'User logged in successfully',
+          user: existingUser,
+          token,
+          refreshToken,
+        });
+      }
+  
+      // Create a new user if not exists
+      const newUser = new User({
+        firstName,
+        lastName,
+        email,
+        status: 'active',
+        googleId: id,
+        isAdmin: 0, 
+        GoogleVerified: email_verified,
+      });
+  
+      // Save the new user to the database
+      const savedUser = await newUser.save();
+  
+      const token = jwt.sign(
+        { email: savedUser.email, id: savedUser._id },
+        process.env.ACCESS_TOKEN_SECRET_KEY,
+        { expiresIn: '1h' }
+      );
+  
+      const refreshToken = jwt.sign(
+        { email: savedUser.email, id: savedUser._id },
+        process.env.REFRESH_TOKEN_SECRET_KEY,
+        { expiresIn: '7d' }
+      );
+  
+      return res.status(201).json({
+        message: 'User created successfully',
+        user: savedUser,
+        token,
+        refreshToken,
+      });
+    } catch (error) {
+      console.error('Error saving Google user:', error.message);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    }
+  };
 
 
 
