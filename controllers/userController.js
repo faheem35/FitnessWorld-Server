@@ -313,6 +313,7 @@ exports.otpVerification = async (req, res) => {
     }
 };
 
+
 exports.googleLogin = async (req, res) => {
     const { email, email_verified, firstName, lastName, id } = req.body;
   
@@ -322,7 +323,7 @@ exports.googleLogin = async (req, res) => {
       }
   
       // Check if the user already exists
-      let existingUser = await User.findOne({ email });
+      let existingUser = await users.findOne({ email });
   
       if (existingUser) {
         // Generate Tokens
@@ -349,7 +350,7 @@ exports.googleLogin = async (req, res) => {
       }
   
       // Create a new user if not exists
-      const newUser = new User({
+      const newUser = new users({
         firstName,
         lastName,
         email,
@@ -385,129 +386,4 @@ exports.googleLogin = async (req, res) => {
       return res.status(500).json({ message: 'Internal Server Error' });
     }
   };
-
-
-
-
-
-// // Refresh Token API endpoint
-// exports.refreshToken = async (req, res) => {
-//     console.log("Received Cookies:", req.cookies);
-//     const refreshToken = req.cookies.refreshToken;
-    
-
-
-//     if (!refreshToken) return res.status(401).json({ message: "No refresh token available" });
-
-//     try {
-//         // Verify the refresh token
-//         const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET_KEY);
-
-//         // Find the user associated with the email in the refresh token
-//         const user = await users.findOne({ email: decoded.email });
-//         if (!user) return res.status(400).json({ message: "User not found" });
-
-//         // Generate a new access token
-//         const newAccessToken = jwt.sign({ email: user.email }, process.env.ACCESS_TOKEN_SECRET_KEY, { expiresIn: '1h' });
-
-//         // Return the new access token
-//         return res.status(200).json({
-//             message: "New access token created",
-//             accessToken: newAccessToken,
-//         });
-
-//     } catch (error) {
-//         console.log('Error in creating the new access token:', error.message);
-//         return res.status(403).json({ message: "Error in creating the new access token" });
-//     }
-// };
-
-// exports.googleLogin = async (req, res) => {
-//     const { email, email_verified, firstName, lastName, id } = req.body;
   
-//     try {
-//       if (!email || !id) {
-//         return res.status(400).json({ message: 'Missing required fields' });
-//       }
-  
-//       // Check if the user already exists
-//       let existingUser = await users.findOne({ email });
-  
-//       if (existingUser) {
-//         // Generate Tokens
-//         const token = jwt.sign(
-//           { email: existingUser.email, id: existingUser._id },
-//           process.env.ACCESS_TOKEN_SECRET_KEY,
-//           { expiresIn: '1h' }
-//         );
-//         console.log("Token:",token)
-  
-//         const refreshToken = jwt.sign(
-//           { email: existingUser.email, id: existingUser._id },
-//           process.env.REFRESH_TOKEN_SECRET_KEY,
-//           { expiresIn: '7d' }
-//         );
-//         console.log("Refresh Token:",refreshToken)
-  
-//         return res.status(200).json({
-//           message: 'User logged in successfully',
-//           user: existingUser,
-//           token,
-//           refreshToken,
-//         });
-//       }
-  
-//       // Create a new user if not exists
-//       const newUser = new users({
-//         firstName,
-//         lastName,
-//         email,
-//         status: 'active',
-//         googleId: id,
-//         isAdmin: 0, 
-//         GoogleVerified: email_verified,
-//       });
-  
-//       // Save the new user to the database
-//       const savedUser = await newUser.save();
-  
-//       const token = jwt.sign(
-//         { email: savedUser.email, id: savedUser._id },
-//         process.env.ACCESS_TOKEN_SECRET_KEY,
-//         { expiresIn: '1h' }
-//       );
-  
-//       const refreshToken = jwt.sign(
-//         { email: savedUser.email, id: savedUser._id },
-//         process.env.REFRESH_TOKEN_SECRET_KEY,
-//         { expiresIn: '7d' }
-//       );
-  
-//       return res.status(201).json({
-//         message: 'User created successfully',
-//         user: savedUser,
-//         token,
-//         refreshToken,
-//       });
-//     } catch (error) {
-//       console.error('Error saving Google user:', error.message);
-//       return res.status(500).json({ message: 'Internal Server Error' });
-//     }
-//   };
-
-  //get all Workouts for user show
-  
- 
-
-// module.exports={
-//     signUp,
-//     resendOtp,
-//     otpVerification,
-//     login,
-//     // googleLogin,
-   
-    
-    
-  
-//   }
- 

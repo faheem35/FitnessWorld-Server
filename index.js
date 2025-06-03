@@ -19,7 +19,7 @@ faserver.use(trainerRouter)
 faserver.use('/uploads', express.static('./uploads'))
 faserver.use(cookieParser())
 
-const PORT= 3000 || process.env.PORT //setting port for run
+const PORT=  process.env.PORT || 3000  //setting port for run
 
 faserver.listen(PORT,()=>{     //listen section
           console.log(`My faserver is ruuning in port: ${PORT} and waiting for client request!!!`);
