@@ -1,10 +1,16 @@
+// const users = require("../models/userModel")
+// const otps = require("../models/otpModel")
+// const bcrypt = require('bcrypt');
+// const nodemailer = require('nodemailer');
+// const jwt = require("jsonwebtoken");
+
 const users = require("../models/userModel")
 const otps = require("../models/otpModel")
 const bcrypt = require('bcrypt');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend'); // replaces nodemailer
 const jwt = require("jsonwebtoken");
 
-
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const generateOtp = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -12,124 +18,230 @@ const generateOtp = () => {
 
 const sendVerificationMail = async (email, otp) => {
   try {
-     const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.NODEMAILER_EMAIL,
-    pass: process.env.NODEMAILER_PASSWORD,
-  },
-});
+    const emailTemplate = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    line-height: 1.6;
+                    color: #333333;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    background-color: #ffffff;
+                }
+                .header {
+                    text-align: center;
+                    padding: 20px 0;
+                    background-color:rgb(39, 32, 32);
+                }
+                .logo {
+                    font-size: 24px;
+                    color:rgb(216, 6, 6);
+                    font-weight: bold;
+                }
+                .content {
+                    padding: 30px 20px;
+                    text-align: center;
+                }
+                .otp-code {
+                    font-size: 32px;
+                    font-weight: bold;
+                    color:rgb(221, 16, 16);
+                    letter-spacing: 5px;
+                    margin: 20px 0;
+                }
+                .message {
+                    margin: 20px 0;
+                    color: #666666;
+                }
+                .footer {
+                    text-align: center;
+                    padding: 20px;
+                    font-size: 12px;
+                    color: #999999;
+                    border-top: 1px solid #eeeeee;
+                }
+                .note {
+                    font-size: 13px;
+                    color: #666666;
+                    font-style: italic;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <div class="logo">Fitness World</div>
+                </div>
+                <div class="content">
+                    <h2>Verify Your Email Address</h2>
+                    <p class="message">Thank you for choosing Fitness World! To complete your registration, please use the verification code below:</p>
+                    <div class="otp-code">${otp}</div>
+                    <p class="message">This code will expire in 10 minutes.</p>
+                    <p class="note">If you didn't request this verification code, please ignore this email.</p>
+                </div>
+                <div class="footer">
+                    <p>© ${new Date().getFullYear()} Fitness World. All rights reserved.</p>
+                    <p>This is an automated message, please do not reply to this email.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    `;
 
-console.log("Email:", process.env.NODEMAILER_EMAIL);
-console.log("Password Exists:", !!process.env.NODEMAILER_PASSWORD);
+    console.log("Sending via Resend to:", email);
 
-await transporter.verify();
-console.log("SMTP Connected Successfully");
-console.log("Email:", process.env.NODEMAILER_EMAIL);
-console.log("Password Exists:", !!process.env.NODEMAILER_PASSWORD);
+    const { data, error } = await resend.emails.send({
+      from: 'Fitness World <onboarding@resend.dev>', // swap to your verified domain later, e.g. 'Fitness World <noreply@yourdomain.com>'
+      to: email,
+      subject: 'Verify Your Email - Fitness World',
+      text: `Your verification code is: ${otp}. This code will expire in 10 minutes.`,
+      html: emailTemplate,
+    });
 
- await transporter.verify();
-    console.log("SMTP Connected Successfully");
-
-      const emailTemplate = `
-          <!DOCTYPE html>
-          <html>
-          <head>
-              <style>
-                  body {
-                      font-family: Arial, sans-serif;
-                      line-height: 1.6;
-                      color: #333333;
-                  }
-                  .container {
-                      max-width: 600px;
-                      margin: 0 auto;
-                      padding: 20px;
-                      background-color: #ffffff;
-                  }
-                  .header {
-                      text-align: center;
-                      padding: 20px 0;
-                      background-color:rgb(39, 32, 32);
-                  }
-                  .logo {
-                      font-size: 24px;
-                      color:rgb(216, 6, 6);
-                      font-weight: bold;
-                  }
-                  .content {
-                      padding: 30px 20px;
-                      text-align: center;
-                  }
-                  .otp-code {
-                      font-size: 32px;
-                      font-weight: bold;
-                      color:rgb(221, 16, 16);
-                      letter-spacing: 5px;
-                      margin: 20px 0;
-                  }
-                  .message {
-                      margin: 20px 0;
-                      color: #666666;
-                  }
-                  .footer {
-                      text-align: center;
-                      padding: 20px;
-                      font-size: 12px;
-                      color: #999999;
-                      border-top: 1px solid #eeeeee;
-                  }
-                  .note {
-                      font-size: 13px;
-                      color: #666666;
-                      font-style: italic;
-                  }
-              </style>
-          </head>
-          <body>
-              <div class="container">
-                  <div class="header">
-                      <div class="logo">Fitness World</div>
-                  </div>
-                  <div class="content">
-                      <h2>Verify Your Email Address</h2>
-                      <p class="message">Thank you for choosing Fitness World! To complete your registration, please use the verification code below:</p>
-                      <div class="otp-code">${otp}</div>
-                      <p class="message">This code will expire in 10 minutes.</p>
-                      <p class="note">If you didn't request this verification code, please ignore this email.</p>
-                  </div>
-                  <div class="footer">
-                      <p>© ${new Date().getFullYear()} Fitness World. All rights reserved.</p>
-                      <p>This is an automated message, please do not reply to this email.</p>
-                  </div>
-              </div>
-          </body>
-          </html>
-      `;
-
-      console.log("Calling sendMail...");
-
-      const info = await transporter.sendMail({
-          from: {
-              name: 'Fitness World',
-              address: process.env.NODEMAILER_EMAIL
-          },
-          to: email,
-          subject: 'Verify Your Email - Fitness World',
-          text: `Your verification code is: ${otp}. This code will expire in 10 minutes.`,  //If HTML doesn't load, this text is shown.
-          html: emailTemplate,
-      });
-
-      console.log("Message ID:", info.messageId);
-console.log("Accepted:", info.accepted);
-console.log("Rejected:", info.rejected);
-
-      return info.accepted.length > 0;
-  } catch (error) {
-      console.error('Error sending verification email:', error);
+    if (error) {
+      console.error('Resend error:', error);
       return false;
+    }
+
+    console.log("Email sent, id:", data?.id);
+    return true;
+
+  } catch (error) {
+    console.error('Error sending verification email:', error);
+    return false;
   }
 };
+
+// const generateOtp = () => {
+//   return Math.floor(100000 + Math.random() * 900000).toString();
+// };
+
+// const sendVerificationMail = async (email, otp) => {
+//   try {
+//      const transporter = nodemailer.createTransport({
+//   service: "gmail",
+//   auth: {
+//     user: process.env.NODEMAILER_EMAIL,
+//     pass: process.env.NODEMAILER_PASSWORD,
+//   },
+// });
+
+// console.log("Email:", process.env.NODEMAILER_EMAIL);
+// console.log("Password Exists:", !!process.env.NODEMAILER_PASSWORD);
+
+// await transporter.verify();
+// console.log("SMTP Connected Successfully");
+// console.log("Email:", process.env.NODEMAILER_EMAIL);
+// console.log("Password Exists:", !!process.env.NODEMAILER_PASSWORD);
+
+//  await transporter.verify();
+//     console.log("SMTP Connected Successfully");
+
+//       const emailTemplate = `
+//           <!DOCTYPE html>
+//           <html>
+//           <head>
+//               <style>
+//                   body {
+//                       font-family: Arial, sans-serif;
+//                       line-height: 1.6;
+//                       color: #333333;
+//                   }
+//                   .container {
+//                       max-width: 600px;
+//                       margin: 0 auto;
+//                       padding: 20px;
+//                       background-color: #ffffff;
+//                   }
+//                   .header {
+//                       text-align: center;
+//                       padding: 20px 0;
+//                       background-color:rgb(39, 32, 32);
+//                   }
+//                   .logo {
+//                       font-size: 24px;
+//                       color:rgb(216, 6, 6);
+//                       font-weight: bold;
+//                   }
+//                   .content {
+//                       padding: 30px 20px;
+//                       text-align: center;
+//                   }
+//                   .otp-code {
+//                       font-size: 32px;
+//                       font-weight: bold;
+//                       color:rgb(221, 16, 16);
+//                       letter-spacing: 5px;
+//                       margin: 20px 0;
+//                   }
+//                   .message {
+//                       margin: 20px 0;
+//                       color: #666666;
+//                   }
+//                   .footer {
+//                       text-align: center;
+//                       padding: 20px;
+//                       font-size: 12px;
+//                       color: #999999;
+//                       border-top: 1px solid #eeeeee;
+//                   }
+//                   .note {
+//                       font-size: 13px;
+//                       color: #666666;
+//                       font-style: italic;
+//                   }
+//               </style>
+//           </head>
+//           <body>
+//               <div class="container">
+//                   <div class="header">
+//                       <div class="logo">Fitness World</div>
+//                   </div>
+//                   <div class="content">
+//                       <h2>Verify Your Email Address</h2>
+//                       <p class="message">Thank you for choosing Fitness World! To complete your registration, please use the verification code below:</p>
+//                       <div class="otp-code">${otp}</div>
+//                       <p class="message">This code will expire in 10 minutes.</p>
+//                       <p class="note">If you didn't request this verification code, please ignore this email.</p>
+//                   </div>
+//                   <div class="footer">
+//                       <p>© ${new Date().getFullYear()} Fitness World. All rights reserved.</p>
+//                       <p>This is an automated message, please do not reply to this email.</p>
+//                   </div>
+//               </div>
+//           </body>
+//           </html>
+//       `;
+
+//       console.log("Calling sendMail...");
+
+//       const info = await transporter.sendMail({
+//           from: {
+//               name: 'Fitness World',
+//               address: process.env.NODEMAILER_EMAIL
+//           },
+//           to: email,
+//           subject: 'Verify Your Email - Fitness World',
+//           text: `Your verification code is: ${otp}. This code will expire in 10 minutes.`,  //If HTML doesn't load, this text is shown.
+//           html: emailTemplate,
+//       });
+
+//       console.log("Message ID:", info.messageId);
+// console.log("Accepted:", info.accepted);
+// console.log("Rejected:", info.rejected);
+
+//       return info.accepted.length > 0;
+//   } catch (error) {
+//       console.error('Error sending verification email:', error);
+//       return false;
+//   }
+// };
 
 // exports.signUp = async (req, res) => {
   
