@@ -25,6 +25,9 @@ const sendVerificationMail = async (email, otp) => {
     socketTimeout: 60000,
 });
 
+console.log("Email:", process.env.NODEMAILER_EMAIL);
+console.log("Password Exists:", !!process.env.NODEMAILER_PASSWORD);
+
  await transporter.verify();
     console.log("SMTP Connected Successfully");
 
