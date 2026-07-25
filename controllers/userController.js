@@ -16,7 +16,7 @@ const sendVerificationMail = async (email, otp) => {
   service: "gmail",
   auth: {
     user: process.env.NODEMAILER_EMAIL,
-    pass: process.env.NODEMAILDER_PASSWORD,
+    pass: process.env.NODEMAILER_PASSWORD,
   },
 });
 
