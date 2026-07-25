@@ -13,16 +13,18 @@ const generateOtp = () => {
 const sendVerificationMail = async (email, otp) => {
   try {
       const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
-    auth: {
-        user: process.env.NODEMAILER_EMAIL,
-        pass: process.env.NODEMAILER_PASSWORD,
-    },
-    connectionTimeout: 60000,
-    greetingTimeout: 60000,
-    socketTimeout: 60000,
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  requireTLS: true,
+  auth: {
+    user: process.env.NODEMAILER_EMAIL,
+    pass: process.env.NODEMAILER_PASSWORD,
+  },
+  tls: {
+    rejectUnauthorized: false,
+  },
+  connectionTimeout: 60000,
 });
 
 console.log("Email:", process.env.NODEMAILER_EMAIL);
