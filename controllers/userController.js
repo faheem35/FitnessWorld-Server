@@ -13,15 +13,20 @@ const generateOtp = () => {
 const sendVerificationMail = async (email, otp) => {
   try {
       const transporter = nodemailer.createTransport({
-          service: 'gmail',
-          port: 587,
-          secure: false,
-          requireTLS: true,
-          auth: {
-              user: process.env.NODEMAILER_EMAIL,
-              pass: process.env.NODEMAILER_PASSWORD,
-          },
-      });
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+        user: process.env.NODEMAILER_EMAIL,
+        pass: process.env.NODEMAILER_PASSWORD,
+    },
+    connectionTimeout: 60000,
+    greetingTimeout: 60000,
+    socketTimeout: 60000,
+});
+
+ await transporter.verify();
+    console.log("SMTP Connected Successfully");
 
       const emailTemplate = `
           <!DOCTYPE html>
@@ -106,7 +111,7 @@ const sendVerificationMail = async (email, otp) => {
           },
           to: email,
           subject: 'Verify Your Email - Fitness World',
-          text: `Your verification code is: ${otp}. This code will expire in 10 minutes.`,
+          text: `Your verification code is: ${otp}. This code will expire in 10 minutes.`,  //If HTML doesn't load, this text is shown.
           html: emailTemplate,
       });
 
