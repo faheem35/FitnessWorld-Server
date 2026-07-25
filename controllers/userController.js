@@ -109,6 +109,8 @@ console.log("Password Exists:", !!process.env.NODEMAILER_PASSWORD);
           </html>
       `;
 
+      console.log("Calling sendMail...");
+
       const info = await transporter.sendMail({
           from: {
               name: 'Fitness World',
@@ -120,6 +122,10 @@ console.log("Password Exists:", !!process.env.NODEMAILER_PASSWORD);
           html: emailTemplate,
       });
 
+      console.log("Message ID:", info.messageId);
+console.log("Accepted:", info.accepted);
+console.log("Rejected:", info.rejected);
+
       return info.accepted.length > 0;
   } catch (error) {
       console.error('Error sending verification email:', error);
@@ -127,54 +133,112 @@ console.log("Password Exists:", !!process.env.NODEMAILER_PASSWORD);
   }
 };
 
-exports.signUp = async (req, res) => {
+// exports.signUp = async (req, res) => {
   
-  try {
-      const { firstName, lastName, password, email, phoneNumber } = req.body;
+//   try {
+//       const { firstName, lastName, password, email, phoneNumber } = req.body;
 
       
 
-      // Check if email already exists
-      const isEmailExists = await users.findOne({ email });
-      if (isEmailExists) {
-          return res.status(409).json({ message: "User already exists" });
-      }
+//       // Check if email already exists
+//       const isEmailExists = await users.findOne({ email });
+//       if (isEmailExists) {
+//           return res.status(409).json({ message: "User already exists" });
+//       }
 
-      // Generate OTP
-      const otp = generateOtp();
+//       // Generate OTP
+//       const otp = generateOtp();
 
-      // Send OTP via email
-      const emailSent = await sendVerificationMail(email, otp);
-      if (!emailSent) {
-          return res.status(500).json({ message: "Failed to send verification email" });
-      }
+//       // Send OTP via email
+//       const emailSent = await sendVerificationMail(email, otp);
+//       if (!emailSent) {
+//           return res.status(500).json({ message: "Failed to send verification email" });
+//       }
 
-      // Hash the password and temporarily store user data along with OTP in the session
+//       // Hash the password and temporarily store user data along with OTP in the session
 
-      const hashedPassword = await bcrypt.hash(password, 10);
+//       const hashedPassword = await bcrypt.hash(password, 10);
 
-      const otpEntry = new otps({
-          email: email,
-          otp: otp,
-          firstName: firstName,
-          lastName: lastName,
-          phoneNumber: phoneNumber,
-          password: hashedPassword, // Temporarily store password in case the OTP verification is successful
-      });
+//       const otpEntry = new otps({
+//           email: email,
+//           otp: otp,
+//           firstName: firstName,
+//           lastName: lastName,
+//           phoneNumber: phoneNumber,
+//           password: hashedPassword, // Temporarily store password in case the OTP verification is successful
+//       });
 
-      await otpEntry.save();
+//       await otpEntry.save();
       
      
        
 
-      return res.status(200).json({
-          message: "User registered. OTP sent to email for verification",
-          email,
+//       return res.status(200).json({
+//           message: "User registered. OTP sent to email for verification",
+//           email,
           
-      });
+//       });
+//   } catch (error) {
+//       console.error('Sign Up Error:', error);
+//       res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
+
+exports.signUp = async (req, res) => {
+  try {
+    console.log("Signup started");
+
+    const { firstName, lastName, password, email, phoneNumber } = req.body;
+
+    console.log("Checking existing user...");
+    const isEmailExists = await users.findOne({ email });
+
+    if (isEmailExists) {
+      console.log("User already exists");
+      return res.status(409).json({ message: "User already exists" });
+    }
+
+    console.log("Generating OTP...");
+    const otp = generateOtp();
+
+    console.log("Sending email...");
+    const emailSent = await sendVerificationMail(email, otp);
+    console.log("Email sent result:", emailSent);
+
+    if (!emailSent) {
+      console.log("Email sending failed");
+      return res.status(500).json({ message: "Failed to send verification email" });
+    }
+
+    console.log("Hashing password...");
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    console.log("Creating OTP document...");
+    const otpEntry = new otps({
+      email,
+      otp,
+      firstName,
+      lastName,
+      phoneNumber,
+      password: hashedPassword,
+    });
+
+    console.log("Saving OTP...");
+    await otpEntry.save();
+
+    console.log("OTP saved successfully");
+
+    return res.status(200).json({
+      message: "User registered. OTP sent to email",
+      email,
+    });
+
   } catch (error) {
-      console.error('Sign Up Error:', error);
-      res.status(500).json({ message: "Internal Server Error" });
+    console.error("SIGNUP ERROR:", error);
+    return res.status(500).json({
+      message: error.message,
+      stack: error.stack,
+    });
   }
 };
 
